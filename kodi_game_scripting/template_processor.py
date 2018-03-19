@@ -78,7 +78,13 @@ class TemplateProcessor:
 
             # Files may have templatized names
             if '{{' in infile and '}}' in infile:
-                outfile = jinja2.Template(infile).render(template_vars)
+                outfile = (jinja2.Environment(undefined=_TreeUndefined)
+                           .from_string(infile).render(template_vars))
+                if "//" in outfile or outfile.endswith('/'):
+                    print("    Skipping {}"
+                          " (expression evaluates to empty name)"
+                          .format(infile))
+                    continue
             else:
                 outfile = infile
             outfile_name, extension = os.path.splitext(outfile)
